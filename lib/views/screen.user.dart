@@ -12,6 +12,18 @@ class UserScreen extends StatelessWidget {
     final Map<String, dynamic> user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final size = MediaQuery.of(context).size;
 
+    String? photoUrl;
+
+    if(user.containsKey('foto_pastor')) {
+      String photoID = (user['foto_pastor'] as String).split('/').last;
+        photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+    }
+
+    else if(user.containsKey('foto_esposa')) {
+      String photoID = (user['foto_esposa'] as String).split('/').last;
+      photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -28,11 +40,25 @@ class UserScreen extends StatelessWidget {
               leading: Hero(
                 tag: user["cedula"],
                 child: SizedBox(
-                  width: size.width * 0.2,
-                  height: size.width * 0.3,
-                  child: const CircleAvatar(
-                    child: Icon(Icons.person),
-                  ),
+                  width: size.width * 0.15,
+                  height: size.width * 0.15,
+                  child: photoUrl == null?
+                    const Icon(Icons.person):
+                    ClipRRect(
+                      // clipBehavior: Clip.hardEdge,
+                      borderRadius: BorderRadius.circular(50),
+                      child: FadeInImage.assetNetwork(
+                        image: photoUrl,
+                        imageErrorBuilder: (_, __, ___) {
+                          return const Icon(Icons.image_not_supported_rounded);
+                        },
+                        alignment: Alignment.center,
+                        // width: size.width * 0.1,
+                        // height: size.width * 0.1,
+                        fit: BoxFit.cover,
+                        placeholder: "assets/loader.gif",
+                      ),
+                    ),
                 ),
               ),
               title: const Text("Nombres y apellidos"),
@@ -70,7 +96,7 @@ class UserScreen extends StatelessWidget {
       ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle: Text("${(user["celular"] as String).trim().isNotEmpty? user["celular"]:"No disponible"}"),
+        subtitle: Text("${(user["celular"] ?? "").trim().isNotEmpty? user["celular"]:"No disponible"}"),
         trailing: const Icon(Icons.call),
         onTap: () async {
           SmartDialog.showLoading();

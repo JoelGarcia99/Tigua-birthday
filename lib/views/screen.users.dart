@@ -23,6 +23,9 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget build(BuildContext context) {
 
     final size = MediaQuery.of(context).size;
+    
+    // fetching new initial data.
+    API().queryUsersByFilter(value);
 
     return Scaffold(
       appBar: AppBar(
@@ -62,8 +65,8 @@ class _UsersScreenState extends State<UsersScreen> {
               }
             ),
           ),
-          FutureBuilder<List<Map<String, dynamic>>>(
-            future: API().queryUsersByFilter(value),
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: API().dataStream.stream,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if(!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator(),);
@@ -71,10 +74,35 @@ class _UsersScreenState extends State<UsersScreen> {
 
               final List<Map<String, dynamic>> data = snapshot.data!;
 
+              final scrollController = ScrollController();
+
+              scrollController.addListener(() {
+                if(scrollController.offset >= scrollController.position.maxScrollExtent * 0.8
+                  && scrollController.position.maxScrollExtent > size.height
+                ) {
+                  API().queryUsersByFilter(value);
+                }
+              });
+
               return Expanded(
                 child: ListView.builder(
+                  controller: scrollController,
                   itemCount: data.length,
                   itemBuilder: (context, index) {
+
+                    String? photoUrl;
+
+                    switch(value) {
+                      case "pastor": 
+                        String photoID = (data[index]['foto_pastor'] ?? "").split('/').last;
+                        photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+                        break;
+                      case "esposa":
+                        String photoID = (data[index]['foto_esposa'] ?? "").split('/').last;
+                        photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
+                        break;
+                    }
+
                     return Card(
                       elevation: 2.0,
                       child: Column(
@@ -85,19 +113,33 @@ class _UsersScreenState extends State<UsersScreen> {
                               leading: Hero(
                                 tag: data[index]["cedula"],
                                 child: SizedBox(
-                                  width: size.width * 0.2,
-                                  height: size.width * 0.3,
-                                  child: const CircleAvatar(
-                                    child: Icon(Icons.person),
-                                  ),
+                                  width: size.width * 0.15,
+                                  height: size.width * 0.15,
+                                  child: photoUrl == null?
+                                    const Icon(Icons.person):
+                                    ClipRRect(
+                                      // clipBehavior: Clip.hardEdge,
+                                      borderRadius: BorderRadius.circular(50),
+                                      child: FadeInImage.assetNetwork(
+                                        image: photoUrl,
+                                        imageErrorBuilder: (_, __, ___) {
+                                          return const Icon(Icons.image_not_supported_rounded);
+                                        },
+                                        alignment: Alignment.center,
+                                        // width: size.width * 0.1,
+                                        // height: size.width * 0.1,
+                                        fit: BoxFit.cover,
+                                        placeholder: "assets/loader.gif",
+                                      ),
+                                    ),
                                 ),
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.arrow_forward_ios_outlined),
                                 onPressed: ()=>Navigator.of(context).pushNamed(RouteNames.user.toString(), arguments: data[index]),
                               ),
-                              title: const Text("Nombres y apellidos"),
-                              subtitle: Text("${data[index]["apellidos"] ?? data[index]["nombre_pastor"]} ${data[index]["apellidos"] != null? data[index]["nombres"] ?? "":data[index]["apellido_pastor"]}"),
+                              title: Text("${data[index]["apellidos"] ?? data[index]["nombre_pastor"]} ${data[index]["apellidos"] != null? data[index]["nombres"] ?? "":data[index]["apellido_pastor"]}"),
+                              subtitle: Text("${data[index]["cedula"]}"),
                             ),
                           ),
                         ],
