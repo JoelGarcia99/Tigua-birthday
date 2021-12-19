@@ -96,7 +96,7 @@ class UserScreen extends StatelessWidget {
       
               if(userData.containsKey("foto_hijo")) ...loadPastorHijoData(userData),
               if(userData.containsKey("foto_esposa")) ...loadPastorEsposaData(userData),
-              if(userData.containsKey("foto_pastor")) ...loadPastorData(userData),
+              if(userData.containsKey("foto_pastor")) ...loadPastorData(size, userData),
               
             ],
           );
@@ -105,7 +105,7 @@ class UserScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> loadPastorData(Map<String, dynamic> user) {
+  List<Widget> loadPastorData(Size size, Map<String, dynamic> user) {
     return <Widget>[
       ListTile(
         leading: const Icon(Icons.indeterminate_check_box_sharp),
@@ -116,17 +116,39 @@ class UserScreen extends StatelessWidget {
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
         subtitle: Text("${(user["celular"] ?? "").trim().isNotEmpty? user["celular"]:"No disponible"}"),
-        trailing: const Icon(Icons.call),
-        onTap: () async {
-          SmartDialog.showLoading();
-          // final link = WhatsAppUnilink(
-          //   phoneNumber: ,
-          //   text: "Felicidades! Disfruta este día.",
-          // );
+        trailing: SizedBox(
+          width: size.width * 0.3,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.phone),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  // final link = WhatsAppUnilink(
+                  //   phoneNumber: ,
+                  //   text: "Felicidades! Disfruta este día.",
+                  // );
 
-          await launch('tel:${user["celular"]}');
-          SmartDialog.dismiss();
-        },
+                  await launch('tel:${user["celular"]}');
+                  SmartDialog.dismiss();
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.chat_bubble),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  final link = WhatsAppUnilink(
+                    phoneNumber: user["celular"],
+                    text: "Felicidades! Disfruta este día.",
+                  );
+
+                  await launch('$link');
+                  SmartDialog.dismiss();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       ListTile(
         leading: const Icon(Icons.baby_changing_station),

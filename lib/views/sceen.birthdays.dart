@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tigua_birthday/router/router.routes.dart';
 
 class BirthdayScreen extends StatelessWidget {
   const BirthdayScreen({ Key? key }) : super(key: key);
@@ -15,6 +16,12 @@ class BirthdayScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.black,),
+            onPressed: ()=>Navigator.of(context).pushNamed(RouteNames.settings.toString())
+          )
+        ],
       ),
       body: ListView(
         children: [

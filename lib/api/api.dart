@@ -26,6 +26,30 @@ class API {
 
   final dataStream = StreamController<List<Map<String, dynamic>>>.broadcast();
 
+  Future<List<Map<String, dynamic>>> queryCumpleaneros() async {
+
+    final url = Uri.parse("http://ieanjesus.portomamey.com/public/Home/datatable_cumple");
+
+    // birthdays within the next 7 days
+    final currentWeek = DateTime.now();
+    final endWeek = currentWeek.add(const Duration(days: 7));
+
+     final response = await http.post(url, body: {
+      "mesini": currentWeek.month.toString(),
+      "mesfin": endWeek.month.toString(),
+      "diaini": currentWeek.day.toString(),
+      "diafin": endWeek.day.toString()
+    });
+
+    if(response.statusCode != 200) {
+      return [];
+    }
+
+    final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
+    return List<Map<String, dynamic>>.from(decodedJson["data"]);
+
+  }
+
   Future<Map<String, dynamic>> queryUserByID(String id, String type) async {
     
     late String filter;
