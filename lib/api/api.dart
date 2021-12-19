@@ -26,6 +26,38 @@ class API {
 
   final dataStream = StreamController<List<Map<String, dynamic>>>.broadcast();
 
+  Future<Map<String, dynamic>> queryUserByID(String id, String type) async {
+    
+    late String filter;
+
+    switch(type) {
+      case "P": filter = "retornapastor"; break;
+      case "E": filter = "retornaresposa"; break;
+      case "H": filter = "retornahijopastor_byid"; break;
+      default: filter = "retornapastor"; break;
+    }
+
+    final uri = Uri.parse("$host/$filter");
+
+    final response = await http.post(uri, body: {
+      "id": id
+    });
+
+    if(response.statusCode != 200) {
+      SmartDialog.showToast(
+        "No hay más datos para cargar", 
+        time: const Duration(seconds: 2)
+      );
+
+      isLoading = false;
+      return {};
+    }
+
+    final decodedJson = List<Map<String, dynamic>>.from(json.decode(response.body));
+
+    return decodedJson.isNotEmpty? decodedJson.last:{};
+  }
+
   Future<List<Map<String, dynamic>>> queryUsersByFilter(String filter) async {
 
     // If it's loading do not fetch new data
@@ -46,18 +78,19 @@ class API {
     ++page;
 
     switch(filter) {
-      case "esposa": target = "retornaresposa"; break;
-      case "hijos": target = "retornahijopastor_byid"; break;
-      case "pastor": target = "datatable_pastor"; break;
-      default: target = "retornapastor"; break;
+      case "esposa": target = "E"; break;
+      case "hijos": target = "H"; break;
+      case "pastor": target = "P"; break;
+      default: target = "P"; break;
     }
 
-    final uri = Uri.parse("$host/$target");
+    final uri = Uri.parse("$host/datatable_cumple");
 
     final response = await http.post(uri, body: {
       "length": "20",
       "start": "${20 * page}",
-      "draw": "1"
+      "draw": "1",
+      "tipo": target
     });
 
     if(response.statusCode != 200) {
@@ -72,7 +105,7 @@ class API {
 
     final decodedJson = json.decode(response.body);
 
-    elements.addAll(List<Map<String, dynamic>>.from(target == "datatable_pastor"? decodedJson["data"]:decodedJson));
+    elements.addAll(List<Map<String, dynamic>>.from(decodedJson["data"]));
 
     dataStream.sink.add(elements);
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:tigua_birthday/api/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
@@ -12,18 +13,6 @@ class UserScreen extends StatelessWidget {
     final Map<String, dynamic> user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final size = MediaQuery.of(context).size;
 
-    String? photoUrl;
-
-    if(user.containsKey('foto_pastor')) {
-      String photoID = (user['foto_pastor'] as String).split('/').last;
-        photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
-    }
-
-    else if(user.containsKey('foto_esposa')) {
-      String photoID = (user['foto_esposa'] as String).split('/').last;
-      photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -32,56 +21,86 @@ class UserScreen extends StatelessWidget {
         foregroundColor: Colors.black,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListTile(
-              leading: Hero(
-                tag: user["cedula"],
-                child: SizedBox(
-                  width: size.width * 0.15,
-                  height: size.width * 0.15,
-                  child: photoUrl == null?
-                    const Icon(Icons.person):
-                    ClipRRect(
-                      // clipBehavior: Clip.hardEdge,
-                      borderRadius: BorderRadius.circular(50),
-                      child: FadeInImage.assetNetwork(
-                        image: photoUrl,
-                        imageErrorBuilder: (_, __, ___) {
-                          return const Icon(Icons.image_not_supported_rounded);
-                        },
-                        alignment: Alignment.center,
-                        // width: size.width * 0.1,
-                        // height: size.width * 0.1,
-                        fit: BoxFit.cover,
-                        placeholder: "assets/loader.gif",
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: API().queryUserByID(user['id'], user['tipo']),
+        builder: (context, snapshot) {
+
+          if(!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator(),);
+          }
+
+          final userData = snapshot.data!;
+
+          String? photoUrl;
+          
+          switch((user['tipo'] as String).trim().toUpperCase()) {
+            case "E":
+              String photoID = (userData['foto_esposa'] ?? "sin_foto.jpg").split('/').last;
+              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
+              break;
+            case "P":
+              String photoID = (userData['foto_pastor'] ?? "sin_foto.jpg").split('/').last;
+              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+              break;
+            case "H":
+            default:
+              String photoID = ("sin_foto.jpg").split('/').last;
+              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+              break;
+          }
+
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: size.width * 0.4,
+                      height: size.width * 0.4,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: FadeInImage.assetNetwork(
+                          image: photoUrl,
+                          imageErrorBuilder: (_, __, ___) {
+                            return const Icon(Icons.image_not_supported_rounded);
+                          },
+                          alignment: Alignment.center,
+                          fit: BoxFit.cover,
+                          placeholder: "assets/loader.gif",
+                        ),
                       ),
                     ),
+                    Center(
+                      child: Text(
+                        "${userData["apellidos"] ?? userData["nombre_pastor"]} ${userData["apellidos"] != null? userData["nombres"] ?? "":userData["apellido_pastor"]}",
+                        style: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              title: const Text("Nombres y apellidos"),
-              subtitle: Text("${user["apellidos"] ?? user["nombre_pastor"]} ${user["apellidos"] != null? user["nombres"] ?? "":user["apellido_pastor"]}"),
-            ),
-          ),
-          
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text("Cédula"),
-            subtitle: Text("${user["cedula"]}"),
-          ),
-          ListTile(
-            leading: const Icon(Icons.flag),
-            title: const Text("Nacionalidad"),
-            subtitle: Text("${user["nacionalidad"] ?? "No disponible"}"),
-          ),
-
-          if(user.containsKey("foto_hijo")) ...loadPastorHijoData(user),
-          if(user.containsKey("foto_esposa")) ...loadPastorEsposaData(user),
-          if(user.containsKey("foto_pastor")) ...loadPastorData(user),
-          
-        ],
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text("Cédula"),
+                subtitle: Text("${userData["cedula"]}"),
+              ),
+              ListTile(
+                leading: const Icon(Icons.flag),
+                title: const Text("Nacionalidad"),
+                subtitle: Text("${userData["nacionalidad"] ?? "No disponible"}"),
+              ),
+      
+              if(userData.containsKey("foto_hijo")) ...loadPastorHijoData(userData),
+              if(userData.containsKey("foto_esposa")) ...loadPastorEsposaData(userData),
+              if(userData.containsKey("foto_pastor")) ...loadPastorData(userData),
+              
+            ],
+          );
+        }
       ),
     );
   }
