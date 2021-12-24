@@ -51,8 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
-          label: "Personas",
-          tooltip: "Lista de usuarios"
+          label: "Pastores",
+          tooltip: "Lista de pastores"
         ),
       ],
     );

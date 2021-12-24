@@ -1,4 +1,4 @@
-package com.example.tigua_birthday
+package com.portomamey.ieanjesus.birthday
 
 import io.flutter.embedding.android.FlutterActivity
 

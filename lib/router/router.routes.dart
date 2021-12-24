@@ -10,5 +10,5 @@ enum RouteNames{
 Map<String, Widget Function(BuildContext)> buildRoutes() => {
   RouteNames.home.toString(): (_)=> const HomeScreen(),
   RouteNames.user.toString(): (_)=> const UserScreen(),
-  RouteNames.settings.toString(): (_)=> const SettingsPage()
+  RouteNames.settings.toString(): (_)=> const SettingsPage(),
 };

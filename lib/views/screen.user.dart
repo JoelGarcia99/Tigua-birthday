@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:tigua_birthday/api/api.dart';
+import 'package:tigua_birthday/router/router.routes.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
@@ -16,40 +17,61 @@ class UserScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Usuarios",
+          "Detalles de usuario",
         ),
         foregroundColor: Colors.black,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: API().queryUserByID(user['id'], user['tipo']),
+        future: !user.containsKey('id')?
+          Future.value(user):API().queryUserByID(user['id'], user['tipo']),
         builder: (context, snapshot) {
 
           if(!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator(),);
           }
 
+
           final userData = snapshot.data!;
+
+          if(userData.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: const [
+                  Icon(Icons.person_search_rounded, size: 50.0,),
+                  Text("Usuario no encontrado", style: TextStyle(fontSize: 20.0),),
+                ],
+              ),
+            );
+          }
 
           String? photoUrl;
           
-          switch((user['tipo'] as String).trim().toUpperCase()) {
-            case "E":
-              String photoID = (userData['foto_esposa'] ?? "sin_foto.jpg").split('/').last;
-              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
-              break;
-            case "P":
-              String photoID = (userData['foto_pastor'] ?? "sin_foto.jpg").split('/').last;
-              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
-              break;
-            case "H":
-            default:
-              String photoID = ("sin_foto.jpg").split('/').last;
-              photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
-              break;
+          if(user.containsKey("id")) {
+            switch((user['tipo'] as String).trim().toUpperCase()) {
+              case "E":
+                String photoID = (userData['foto_esposa'] ?? "sin_foto.jpg").split('/').last;
+                photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_esposa_pastor/$photoID";
+                break;
+              case "P":
+                String photoID = (userData['foto_pastor'] ?? "sin_foto.jpg").split('/').last;
+                photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+                break;
+              case "H":
+              default:
+                String photoID = ("sin_foto.jpg").split('/').last;
+                photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
+                break;
+            }
+          }else {
+            String photoID = (userData['foto_pastor'] ?? "sin_foto.jpg").split('/').last;
+            photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
           }
 
           return ListView(
+            physics: const BouncingScrollPhysics(),
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -71,6 +93,7 @@ class UserScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 20,),
                     Center(
                       child: Text(
                         "${userData["apellidos"] ?? userData["nombre_pastor"]} ${userData["apellidos"] != null? userData["nombres"] ?? "":userData["apellido_pastor"]}",
@@ -94,8 +117,8 @@ class UserScreen extends StatelessWidget {
                 subtitle: Text("${userData["nacionalidad"] ?? "No disponible"}"),
               ),
       
-              if(userData.containsKey("foto_hijo")) ...loadPastorHijoData(userData),
-              if(userData.containsKey("foto_esposa")) ...loadPastorEsposaData(userData),
+              if(userData.containsKey("foto_hijo")) ...loadPastorHijoData(context, userData),
+              if(userData.containsKey("foto_esposa")) ...loadPastorEsposaData(context, userData),
               if(userData.containsKey("foto_pastor")) ...loadPastorData(size, userData),
               
             ],
@@ -106,6 +129,16 @@ class UserScreen extends StatelessWidget {
   }
 
   List<Widget> loadPastorData(Size size, Map<String, dynamic> user) {
+
+    String telefono = user["celular"] ?? "";
+
+    if(telefono.length == 10) {
+      telefono = telefono.replaceFirst('0', '');
+    }
+    if(telefono.length > 8) {
+      telefono = "+593 $telefono";
+    }
+
     return <Widget>[
       ListTile(
         leading: const Icon(Icons.indeterminate_check_box_sharp),
@@ -115,7 +148,7 @@ class UserScreen extends StatelessWidget {
       ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle: Text("${(user["celular"] ?? "").trim().isNotEmpty? user["celular"]:"No disponible"}"),
+        subtitle: Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
         trailing: SizedBox(
           width: size.width * 0.3,
           child: Row(
@@ -124,12 +157,7 @@ class UserScreen extends StatelessWidget {
                 icon: const Icon(Icons.phone),
                 onPressed: ()async{
                   SmartDialog.showLoading();
-                  // final link = WhatsAppUnilink(
-                  //   phoneNumber: ,
-                  //   text: "Felicidades! Disfruta este día.",
-                  // );
-
-                  await launch('tel:${user["celular"]}');
+                  await launch('tel:+593 ${user["celular"]}');
                   SmartDialog.dismiss();
                 },
               ),
@@ -138,7 +166,7 @@ class UserScreen extends StatelessWidget {
                 onPressed: ()async{
                   SmartDialog.showLoading();
                   final link = WhatsAppUnilink(
-                    phoneNumber: user["celular"],
+                    phoneNumber: "+593 ${user["celular"]}",
                     text: "Felicidades! Disfruta este día.",
                   );
 
@@ -168,12 +196,38 @@ class UserScreen extends StatelessWidget {
     ];
   }
 
-  List<Widget> loadPastorEsposaData(Map<String, dynamic> user) {
+  List<Widget> loadPastorEsposaData(BuildContext context, Map<String, dynamic> user) {
+    
+    String telefono = user["telefono"] ?? "";
+
+    if(telefono.length == 10) {
+      telefono = telefono.replaceFirst('0', '');
+    }
+    if(telefono.length > 8) {
+      telefono = "+593 $telefono";
+    }
+    
     return <Widget>[
+      ListTile(
+        trailing: const Icon(Icons.arrow_forward_ios),
+        leading: const Icon(Icons.person),
+        title: const Text("Pastor responsable"),
+        subtitle: Text("${user['nombre_pastor']} ${user['apellido_pastor']}"),
+        onTap: (){
+          Navigator.of(context).pushNamed(
+            RouteNames.user.toString(), 
+            arguments: {
+              'id': user['id_pastor'],
+              'apellidos': user['apellido_pastor'],
+              'tipo': 'P'
+            }
+          );
+        },
+      ),
       ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle: Text("${(user["telefono"] as String).trim().isNotEmpty? user["telefono"]:"No disponible"}"),
+        subtitle: Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
       ),
       ListTile(
         leading: const Icon(Icons.baby_changing_station),
@@ -190,20 +244,41 @@ class UserScreen extends StatelessWidget {
         title: const Text("Especialidad"),
         subtitle: Text("${user["especialidad"]}"),
       ),
-      ListTile(
-        leading: const Icon(Icons.person),
-        title: const Text("Pastor"),
-        subtitle: Text("${user['nombre_pastor']} ${user['apellido_pastor']}"),
-      )
     ];
   }
 
-  List<Widget> loadPastorHijoData(Map<String, dynamic> user) {
-    return <Widget>[
+  List<Widget> loadPastorHijoData(BuildContext context, Map<String, dynamic> user) {
+    
+    String telefono = user["telefono"] ?? "";
+
+    if(telefono.length == 10) {
+      telefono = telefono.replaceFirst('0', '');
+    }
+    if(telefono.length > 8) {
+      telefono = "+593 $telefono";
+    }
+    
+    return <Widget>[   
+      ListTile(
+        trailing: const Icon(Icons.arrow_forward_ios),
+        leading: const Icon(Icons.person),
+        title: const Text("Pastor responsable"),
+        subtitle: Text("${user['nombre_pastor']} ${user['apellido_pastor']}"),
+        onTap: (){
+          Navigator.of(context).pushNamed(
+            RouteNames.user.toString(), 
+            arguments: {
+              'id': user['id_pastor'],
+              'apellidos': user['apellido_pastor'],
+              'tipo': 'P'
+            }
+          );
+        },
+      ),
       ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle: Text("${(user["telefono"] as String).trim().isNotEmpty? user["telefono"]:"No disponible"}"),
+        subtitle:  Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
       ),
       ListTile(
         leading: const Icon(Icons.smartphone),
@@ -220,11 +295,6 @@ class UserScreen extends StatelessWidget {
         title: const Text("Instrucción"),
         subtitle: Text("${user["estudios"]}"),
       ),
-      ListTile(
-        leading: const Icon(Icons.person),
-        title: const Text("Pastor"),
-        subtitle: Text("${user['nombre_pastor']} ${user['apellido_pastor']}"),
-      )
     ];
   }
 }

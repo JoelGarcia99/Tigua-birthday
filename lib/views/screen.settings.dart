@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
                   await WritterHelper().writeFileJson(jsonEncoded);
                   SmartDialog.showToast("Datos sincronizados con éxito");
                 }catch(e) {
-                  print(e);
+                  debugPrint(e.toString());
                   SmartDialog.showToast("Error sincronizando, intente más tarde", 
                     time: const Duration(seconds: 2)
                   );
@@ -43,6 +43,12 @@ class SettingsPage extends StatelessWidget {
               }
               SmartDialog.dismiss();
             },
+          ),
+          const Divider(),
+          const ListTile(
+            leading: Icon(Icons.info),
+            title: Text("Versión de la aplicación"),
+            subtitle: Text("1.0.0"),
           )
         ],
       ),
