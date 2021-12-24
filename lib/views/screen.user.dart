@@ -167,7 +167,7 @@ class UserScreen extends StatelessWidget {
                   SmartDialog.showLoading();
                   final link = WhatsAppUnilink(
                     phoneNumber: "+593 ${user["celular"]}",
-                    text: "Felicidades! Disfruta este día.",
+                    text: "Felicidades! Dios le bendiga",
                   );
 
                   await launch('$link');

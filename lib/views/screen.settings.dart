@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/helpers/helper.writter.dart';
 
@@ -45,11 +46,29 @@ class SettingsPage extends StatelessWidget {
             },
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text("Versión de la aplicación"),
-            subtitle: Text("1.0.0"),
-          )
+          FutureBuilder(
+            future: PackageInfo.fromPlatform(),
+            builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+              if(!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator(),);
+              }
+
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: const Text("Versión de la aplicación"),
+                    subtitle: Text(snapshot.data!.version),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.compass_calibration),
+                    title: const Text("Número de compilación"),
+                    subtitle: Text(snapshot.data!.buildNumber),
+                  ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );

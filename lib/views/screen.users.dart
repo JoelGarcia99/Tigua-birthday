@@ -191,7 +191,14 @@ class _UsersScreenState extends State<UsersScreen> {
                   ),
                 ),
               ),
-              onTap: ()=>Navigator.of(context).pushNamed(RouteNames.user.toString(), arguments: data),
+              onTap: ()=>Navigator.of(context).pushNamed(
+                RouteNames.user.toString(), 
+                arguments: {
+                  'id': data['id'],
+                  'apellidos': data['apellido_pastor'],
+                  'tipo': 'P'
+                }
+              ),
               title: Text("${data["apellidos"]?? (data['apellido_pastor'] + " " + data['nombre_pastor'])}"),
               subtitle: Text.rich(
                 TextSpan(
