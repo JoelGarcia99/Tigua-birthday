@@ -2,8 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
 
-class BirthdayScreen extends StatelessWidget {
+class BirthdayScreen extends StatefulWidget {
   const BirthdayScreen({ Key? key }) : super(key: key);
+
+  @override
+  State<BirthdayScreen> createState() => _BirthdayScreenState();
+}
+
+class _BirthdayScreenState extends State<BirthdayScreen> {
+
+  late String selectedFilters;
+
+  @override
+  void initState() {
+    selectedFilters = '';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +39,7 @@ class BirthdayScreen extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: API().queryCumpleaneros(),
+        future: API().queryCumpleaneros(selectedFilters),
         builder: (context, snapshot) {
 
           if(!snapshot.hasData) {
@@ -55,91 +69,112 @@ class BirthdayScreen extends StatelessWidget {
           ));
 
           // removing today birthday users from the next week ones
-          data.removeWhere((user) => DateTime.parse(user["fnacimiento"]).day == DateTime.now().day);
+          final nextBirthdays = List<Map<String, dynamic>>.from(data);
+          nextBirthdays.removeWhere((user) => DateTime.parse(user["fnacimiento"]).day == DateTime.now().day);
           
           // how many is the height of the card in percent (%)
           const double cardSizeProp = 0.3;
 
 
-          return ListView(
-            children: [
-              const ListTile(
-                title: Text("Leyenda"),
-                leading: Icon(Icons.legend_toggle),
-              ),
-              Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                direction: Axis.horizontal,
-                children: [
-                  Container(
-                    width: 20,
-                    height: 20,
-                    margin: const EdgeInsets.all(8.0),
-                    color: const Color(0xff110066),
-                  ),
-                  const Text("Pastor"),
-                  const SizedBox(width: 20.0,),
-                  Container(
-                    width: 20,
-                    height: 20,
-                    margin: const EdgeInsets.all(8.0),
-                    color: const Color(0xff8C0327)
-                  ),
-                  const Text("Esposa"),
-                  const SizedBox(width: 20.0,),
-                  Container(
-                    width: 20,
-                    height: 20,
-                    margin: const EdgeInsets.all(8.0),
-                    color: const Color(0xffFFD432)
-                  ),
-                  const Text("Hijo"),
-                ],
-              ),
-              ListTile(
-                title: Text("Cumpleaños de hoy (${todayUsers.length})"),
-                leading: const Icon(Icons.cake),
-              ),
-              SizedBox(
-                height: size.height * cardSizeProp,
-                child: PageView(
-                  scrollDirection: Axis.horizontal,
-                  controller: PageController(
-                    initialPage: 0,
-                    keepPage: true,
-                    viewportFraction: 0.5
-                  ),
-                  children: todayUsers.isEmpty?
-                    const [Center(child: Text("Nadie cumple años hoy."),)]:
-                    List<Widget>.from(todayUsers.map((user){
-                      return _getBirthdayCard(size, context, user, true);
-                    }))
+          return RefreshIndicator(
+            onRefresh: ()async{
+              setState(() {});
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const ListTile(
+                  title: Text("Filtros"),
+                  leading: Icon(Icons.legend_toggle),
                 ),
-              ),
-              const ListTile(
-                title: Text("Cumpleaños siguientes"),
-                leading: Icon(Icons.cake),
-              ),
-              SizedBox(
-                height: size.height * cardSizeProp,
-                child: PageView(
-                  scrollDirection: Axis.horizontal,
-                  controller: PageController(
-                    initialPage: 0,
-                    keepPage: true,
-                    viewportFraction: 0.5
-                  ),
-                  children: data.isEmpty?
-                    const [Center(child: Text("No hay más cumpleaños esta semana."),)]:
-                    List<Widget>.from(data.map((user){
-                      return _getBirthdayCard(size, context, user);
-                    }))
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  direction: Axis.horizontal,
+                  children: [
+                    _getFilterTag("Pastor", const Color(0xff110066)),
+                    const SizedBox(width: 10.0,),
+                    _getFilterTag("Esposa", const Color(0xff8C0327)),
+                    const SizedBox(width: 10.0,),
+                    _getFilterTag("Hijo", const Color(0xffFFD432)),
+                  ],
                 ),
-              )
-            ],
+                ListTile(
+                  title: Text("Cumpleaños de hoy (${todayUsers.length})"),
+                  leading: const Icon(Icons.cake),
+                ),
+                SizedBox(
+                  height: size.height * cardSizeProp,
+                  child: PageView(
+                    scrollDirection: Axis.horizontal,
+                    controller: PageController(
+                      initialPage: 0,
+                      keepPage: true,
+                      viewportFraction: 0.5
+                    ),
+                    children: todayUsers.isEmpty?
+                      const [Center(child: Text("Nadie cumple años hoy."),)]:
+                      List<Widget>.from(todayUsers.map((user){
+                        return _getBirthdayCard(size, context, user, true);
+                      }))
+                  ),
+                ),
+                const ListTile(
+                  title: Text("Cumpleaños siguientes"),
+                  leading: Icon(Icons.cake),
+                ),
+                SizedBox(
+                  height: size.height * cardSizeProp,
+                  child: PageView(
+                    scrollDirection: Axis.horizontal,
+                    controller: PageController(
+                      initialPage: 0,
+                      keepPage: true,
+                      viewportFraction: 0.5
+                    ),
+                    children: nextBirthdays.isEmpty?
+                      const [Center(child: Text("No hay más cumpleaños en estos días"),)]:
+                      List<Widget>.from(nextBirthdays.map((user){
+                        return _getBirthdayCard(size, context, user);
+                      }))
+                  ),
+                )
+              ],
+            ),
           );
         }
+      ),
+    );
+  }
+
+  Widget _getFilterTag(String title, Color color) {
+
+    return GestureDetector(
+      onTap: () {
+        selectedFilters = title[0] == selectedFilters? '':title[0];
+        setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.only(right: 8.0),
+        decoration: !(selectedFilters == title[0])? null:BoxDecoration(
+          border: Border.all(
+            color: color,
+            width: 2.0
+          ),
+          borderRadius: BorderRadius.circular(15.0)
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.all(8.0),
+              color: color,
+            ),
+            Text(title),
+          ],
+        ),
       ),
     );
   }

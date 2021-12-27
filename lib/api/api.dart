@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 /// Singleton backend connection API
 class API {
@@ -36,43 +34,39 @@ class API {
   /// Fetchs a list of users that have birthday this week. If [useCache] is enable
   /// then this method will try to use the data stored in external storage, it's 
   /// useful when you're offline.
-  Future<List<Map<String, dynamic>>> queryCumpleaneros([bool useCache = true]) async {
+  Future<List<Map<String, dynamic>>> queryCumpleaneros(String filter) async {
 
-    if(useCache) {
-      // Validating the directory exists
-      final directory = await getApplicationDocumentsDirectory();
-      final targetDir = Directory("${directory.path}/temp/birthday_data.json");
-
-      // trying to read the stored file
-      if(await targetDir.exists()) {
-        final file = File(targetDir.path);
-
-        final jsonReaded = List<Map<String, dynamic>>.from(json.decode(await file.readAsString()));
-
-        if(jsonReaded.isEmpty) return jsonReaded;
-      }
-    }
 
     // If there is no file or if it's empty then fetch data from API
     final url = Uri.parse("http://ieanjesus.portomamey.com/public/Home/datatable_cumple");
 
     // birthdays within the next 7 days
     final currentWeek = DateTime.now();
-    final endWeek = currentWeek.add(const Duration(days: 7));
+    var endWeek = currentWeek.add(const Duration(days: 7));
 
-     final response = await http.post(url, body: {
+    if(endWeek.year > currentWeek.year) {
+      endWeek = DateTime(currentWeek.year, 12, 31);
+    }
+
+    final body = {
       "mesini": currentWeek.month.toString(),
       "mesfin": endWeek.month.toString(),
       "diaini": currentWeek.day.toString(),
-      "diafin": endWeek.day.toString()
-    });
+      "diafin": endWeek.day.toString(),
+    };
+
+    body.addAll(filter.isEmpty? {}:{"tipo":filter});
+
+    final response = await http.post(url, body: body);
 
     if(response.statusCode != 200) {
       return [];
     }
 
+    elementsSearched.clear();
     final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
-    return List<Map<String, dynamic>>.from(decodedJson["data"]);
+    elementsSearched.addAll(List<Map<String, dynamic>>.from(decodedJson["data"]));
+    return elementsSearched;
 
   }
 
@@ -129,8 +123,7 @@ class API {
     return decodedJson.isNotEmpty? decodedJson.last:{};
   }
 
-  Future<List<Map<String, dynamic>>> queryUsersByFilter(String filter, [String? query]) async {
-    print(query);
+  Future<List<Map<String, dynamic>>> queryUsersByFilter(String filter, [String? query, bool shouldPurgue = false]) async {
     // If it's loading do not fetch new data
     if(isLoading) return elements;
 
@@ -138,7 +131,7 @@ class API {
     
     // If the filter changes then I should fetch new data of a new
     // group, so the data in [elements] should be removed.
-    if(lastFilter != filter || lastQuery != query) {
+    if(shouldPurgue || lastFilter != filter || lastQuery != query) {
       lastFilter = filter;
       lastQuery = query ?? "";
       elements.clear();

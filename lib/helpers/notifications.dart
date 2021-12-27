@@ -3,6 +3,46 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:tigua_birthday/api/api.dart';
+
+
+void callbackDispatcher() {
+  // For God don't even think about removing this fucking line of code. If you're me
+  // or you have a decent flutter knowledge you'll know why this is important, but if
+  // you don't just don't touch it
+  WidgetsFlutterBinding.ensureInitialized();
+
+  API().queryCumpleaneros('').then((List<Map<String, dynamic>> birthdayList) {
+    birthdayList.sort((a, b){
+
+      final ca = DateTime.parse(a['fnacimiento']);
+      final cb = DateTime.parse(b['fnacimiento']);
+
+      // I compare months and add a year if it's higher than current month just
+      // to sort dates easier.
+      final ya = ca.month > DateTime.now().year? DateTime.now().year + 1:ca.month;
+      final yb = cb.month > DateTime.now().year? DateTime.now().year + 1:cb.month;
+
+      return DateTime(ya, ca.month, ca.day).
+        compareTo(DateTime(yb, cb.month, cb.day));
+    });
+
+    final todayUsers = List<Map<String, dynamic>>.from(birthdayList.where(
+      (user) {
+        // I only check the day because the month is filtered in the request
+        return DateTime.parse(user["fnacimiento"]).day == DateTime.now().day;
+      }
+    ));
+
+    if(todayUsers.isNotEmpty) {
+      Notifications().show(
+        "Tienes ${todayUsers.length} cumpleaños el día de hoy.", 
+        "${todayUsers.where((element) => element['tipo'] == "P").length} pastores cumplen años."
+      );
+    }
+    
+  });
+}
 
 class Notifications {
   static Notifications? _instance;
@@ -23,22 +63,12 @@ class Notifications {
       'resource://drawable/ic_launcher',
       [
         NotificationChannel(
-            channelGroupKey: 'basic_channel_group',
-            channelKey: 'basic_channel',
+            channelKey: 'priority_channel',
             channelName: 'Basic notifications',
-            channelDescription: 'Notification channel for basic tests',
-            defaultColor: const Color(0xFF9D50DD),
-            ledColor: Colors.white
+            channelDescription: 'Notification channel for basic tests'
         ),
       ],
-      // Channel groups are only visual and are not required
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupkey: 'basic_channel_group',
-          channelGroupName: 'Basic group'
-        )
-      ],
-      debug: true
+      debug: false
     );
 
     final isAllowed = await AwesomeNotifications().isNotificationAllowed();
@@ -46,7 +76,7 @@ class Notifications {
       // This is just a basic example. For real apps, you must show some
       // friendly dialog box before call the request method.
       // This is very important to not harm the user experience
-      AwesomeNotifications().requestPermissionToSendNotifications();
+      await AwesomeNotifications().requestPermissionToSendNotifications();
     }
   }
 
@@ -57,7 +87,9 @@ class Notifications {
       AwesomeNotifications(). createNotification(
         content: NotificationContent(
             id: Random().nextInt(3000),
-            channelKey: 'basic_channel',
+            channelKey: 'priority_channel',
+            displayOnForeground: true,
+            displayOnBackground: true,
             title: title,
             body: body
         )

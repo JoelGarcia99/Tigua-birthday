@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tigua_birthday/helpers/helper.writter.dart';
 import 'package:tigua_birthday/helpers/notifications.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
 import 'package:workmanager/workmanager.dart';
@@ -25,14 +24,9 @@ void main() async {
     // reapeat this every single day
     await Workmanager().registerPeriodicTask(
       "birthday_sync", 
-      "Birthday sinchronization",
+      "Birthday synchronization",
       initialDelay: Duration(seconds: targetTime.difference(currentTime).inSeconds),
-      frequency: const Duration(days: 1),
-      inputData: {
-        "type": "sync",
-        "title": "Datos sincronizados",
-        "content": "Se han sincronizado los datos de nuevos cumpleañeros"
-      }
+      frequency: const Duration(minutes: 15),
     );
     
   }

@@ -28,7 +28,7 @@ class _UsersScreenState extends State<UsersScreen> {
     final size = MediaQuery.of(context).size;
     
     // fetching new initial data.
-    API().queryUsersByFilter(value, textController.text);
+    API().queryUsersByFilter(value, textController.text, true);
 
     return Scaffold(
       appBar: AppBar(
@@ -107,11 +107,6 @@ class _UsersScreenState extends State<UsersScreen> {
               
               textController.text = textController.text.trim();
 
-              if(textController.text.length < 4) {
-                SmartDialog.showToast("Debe ingresar al menos 4 caracteres", time: const Duration(seconds: 2));
-                return;
-              }
-
               SmartDialog.showLoading();
               await API().queryUsersByFilter(value, textController.text);
               SmartDialog.dismiss();
@@ -128,8 +123,20 @@ class _UsersScreenState extends State<UsersScreen> {
               final List<Map<String, dynamic>> data = snapshot.data!;
 
               if(data.isEmpty) {
-                return const Center(
-                  child: Text("No hay elementos"),
+                return Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: ()async{
+                      // This will purge all the elements by default
+                      setState(() {});
+                    },
+                    child: ListView(
+                      children: const [
+                        Center(
+                          child: Text("No hay elementos"),
+                        )
+                      ],
+                    ),
+                  ),
                 );
               }
 
@@ -144,13 +151,20 @@ class _UsersScreenState extends State<UsersScreen> {
               });
 
               return Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-
-                    return _getCard(context, data[index]);
+                child: RefreshIndicator(
+                  onRefresh: ()async{
+                    // This will purge all the elements by default
+                    setState(() {});
                   },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: scrollController,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                
+                      return _getCard(context, data[index]);
+                    },
+                  ),
                 ),
               );
             },
