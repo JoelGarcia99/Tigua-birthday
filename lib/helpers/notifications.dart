@@ -2,6 +2,8 @@
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:data_connection_checker_tv/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tigua_birthday/api/api.dart';
@@ -27,6 +29,8 @@ void callbackDispatcher() {
     if(lastDay != null && lastDay == DateTime.now().day) {
       return;
     }
+
+
 
     birthdayList.sort((a, b){
 
@@ -112,5 +116,31 @@ class Notifications {
             body: body
         )
       );
+  }
+
+  Future<bool> isInternet() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      // I am connected to a mobile network, make sure there is actually a net connection.
+      if (await DataConnectionChecker().hasConnection) {
+        // Mobile data detected & internet connection confirmed.
+        return true;
+      } else {
+        // Mobile data detected but no internet connection found.
+        return false;
+      }
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      // I am connected to a WIFI network, make sure there is actually a net connection.
+      if (await DataConnectionChecker().hasConnection) {
+        // Wifi detected & internet connection confirmed.
+        return true;
+      } else {
+        // Wifi detected but no internet connection found.
+        return false;
+      }
+    } else {
+      // Neither mobile data or WIFI detected, not internet connection found.
+      return false;
+    }
   }
 }

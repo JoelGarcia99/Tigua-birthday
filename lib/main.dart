@@ -27,7 +27,7 @@ void main() async {
       "birthday_sync", 
       "Birthday synchronization",
       initialDelay: Duration(seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
-      frequency: const Duration(seconds: 3600 * 24),
+      frequency: const Duration(days: 1),
     );
   }
 
