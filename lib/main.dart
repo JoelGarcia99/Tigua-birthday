@@ -19,16 +19,16 @@ void main() async {
     await Workmanager().cancelAll();
 
     final currentTime = DateTime.now();
-    final targetTime = DateTime.parse("${currentTime.year}-${currentTime.month}-${currentTime.day} 00:00:00").add(const Duration(days: 1));
+    final targetTime = DateTime.parse("${currentTime.year}-${currentTime.month < 10? "0${currentTime.month}":currentTime.month}-${currentTime.day < 10? "0${currentTime.day}":currentTime.day} 00:00:00").add(const Duration(days: 1));
 
-    // reapeat this every single day
+    // reapeat this every single day. The seconds in [initialDelay] makes reference to
+    // the 00h00, so I added 3600 * 8 in order to get the notification at 7 am
     await Workmanager().registerPeriodicTask(
       "birthday_sync", 
       "Birthday synchronization",
-      initialDelay: Duration(seconds: targetTime.difference(currentTime).inSeconds),
-      frequency: const Duration(minutes: 15),
+      initialDelay: Duration(seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
+      frequency: const Duration(seconds: 3600 * 24),
     );
-    
   }
 
   runApp(const MyApp());

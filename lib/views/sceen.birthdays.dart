@@ -38,111 +38,120 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           )
         ],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: API().queryCumpleaneros(selectedFilters),
-        builder: (context, snapshot) {
+      body: Column(
+        children: [
+          const ListTile(
+            title: Text("Filtros"),
+            leading: Icon(Icons.legend_toggle),
+          ),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            direction: Axis.horizontal,
+            children: [
+              _getFilterTag("Pastor", const Color(0xff110066)),
+              const SizedBox(width: 10.0,),
+              _getFilterTag("Esposa", const Color(0xff8C0327)),
+              const SizedBox(width: 10.0,),
+              _getFilterTag("Hijo", const Color(0xffFFD432)),
+            ],
+          ),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: API().queryCumpleaneros(selectedFilters),
+            builder: (context, snapshot) {
 
-          if(!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator(),);
-          }
+              if(!snapshot.hasData || API().isLoading) {
+                return const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Center(child: CircularProgressIndicator(),),
+                );
+              }
 
 
-          final data = snapshot.data!;
-          data.sort((a, b){
+              final data = snapshot.data!;
+              data.sort((a, b){
 
-            final ca = DateTime.parse(a['fnacimiento']);
-            final cb = DateTime.parse(b['fnacimiento']);
+                final ca = DateTime.parse(a['fnacimiento']);
+                final cb = DateTime.parse(b['fnacimiento']);
 
-            // I compare months and add a year if it's higher than current month just
-            // to sort dates easier.
-            final ya = ca.month > DateTime.now().year? DateTime.now().year + 1:ca.month;
-            final yb = cb.month > DateTime.now().year? DateTime.now().year + 1:cb.month;
+                // I compare months and add a year if it's higher than current month just
+                // to sort dates easier.
+                final ya = ca.month > DateTime.now().year? DateTime.now().year + 1:ca.month;
+                final yb = cb.month > DateTime.now().year? DateTime.now().year + 1:cb.month;
 
-            return DateTime(ya, ca.month, ca.day).
-              compareTo(DateTime(yb, cb.month, cb.day));
-          });
+                return DateTime(ya, ca.month, ca.day).
+                  compareTo(DateTime(yb, cb.month, cb.day));
+              });
 
-          final todayUsers = List<Map<String, dynamic>>.from(data.where(
-            (user) {
-              return DateTime.parse(user["fnacimiento"]).day == DateTime.now().day;
+              final todayUsers = List<Map<String, dynamic>>.from(data.where(
+                (user) {
+                  return DateTime.parse(user["fnacimiento"]).day == DateTime.now().day;
+                }
+              ));
+
+              // removing today birthday users from the next week ones
+              final nextBirthdays = List<Map<String, dynamic>>.from(data);
+              nextBirthdays.removeWhere((user) => DateTime.parse(user["fnacimiento"]).day == DateTime.now().day);
+              
+              // how many is the height of the card in percent (%)
+              const double cardSizeProp = 0.3;
+
+
+              return Expanded(
+                child: RefreshIndicator(
+                  onRefresh: ()async{
+                    setState(() {});
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    children: [
+                      ListTile(
+                        title: Text("Cumpleaños de hoy (${todayUsers.length})"),
+                        leading: const Icon(Icons.cake),
+                      ),
+                      SizedBox(
+                        height: size.height * cardSizeProp,
+                        child: PageView(
+                          scrollDirection: Axis.horizontal,
+                          controller: PageController(
+                            initialPage: 0,
+                            keepPage: true,
+                            viewportFraction: 0.5
+                          ),
+                          children: todayUsers.isEmpty?
+                            const [Center(child: Text("Nadie cumple años hoy."),)]:
+                            List<Widget>.from(todayUsers.map((user){
+                              return _getBirthdayCard(size, context, user, true);
+                            }))
+                        ),
+                      ),
+                      const ListTile(
+                        title: Text("Cumpleaños siguientes"),
+                        leading: Icon(Icons.cake),
+                      ),
+                      SizedBox(
+                        height: size.height * cardSizeProp,
+                        child: PageView(
+                          scrollDirection: Axis.horizontal,
+                          controller: PageController(
+                            initialPage: 0,
+                            keepPage: true,
+                            viewportFraction: 0.5
+                          ),
+                          children: nextBirthdays.isEmpty?
+                            const [Center(child: Text("No hay más cumpleaños en estos días"),)]:
+                            List<Widget>.from(nextBirthdays.map((user){
+                              return _getBirthdayCard(size, context, user, false);
+                            }))
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              );
             }
-          ));
-
-          // removing today birthday users from the next week ones
-          final nextBirthdays = List<Map<String, dynamic>>.from(data);
-          nextBirthdays.removeWhere((user) => DateTime.parse(user["fnacimiento"]).day == DateTime.now().day);
-          
-          // how many is the height of the card in percent (%)
-          const double cardSizeProp = 0.3;
-
-
-          return RefreshIndicator(
-            onRefresh: ()async{
-              setState(() {});
-            },
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const ListTile(
-                  title: Text("Filtros"),
-                  leading: Icon(Icons.legend_toggle),
-                ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  direction: Axis.horizontal,
-                  children: [
-                    _getFilterTag("Pastor", const Color(0xff110066)),
-                    const SizedBox(width: 10.0,),
-                    _getFilterTag("Esposa", const Color(0xff8C0327)),
-                    const SizedBox(width: 10.0,),
-                    _getFilterTag("Hijo", const Color(0xffFFD432)),
-                  ],
-                ),
-                ListTile(
-                  title: Text("Cumpleaños de hoy (${todayUsers.length})"),
-                  leading: const Icon(Icons.cake),
-                ),
-                SizedBox(
-                  height: size.height * cardSizeProp,
-                  child: PageView(
-                    scrollDirection: Axis.horizontal,
-                    controller: PageController(
-                      initialPage: 0,
-                      keepPage: true,
-                      viewportFraction: 0.5
-                    ),
-                    children: todayUsers.isEmpty?
-                      const [Center(child: Text("Nadie cumple años hoy."),)]:
-                      List<Widget>.from(todayUsers.map((user){
-                        return _getBirthdayCard(size, context, user, true);
-                      }))
-                  ),
-                ),
-                const ListTile(
-                  title: Text("Cumpleaños siguientes"),
-                  leading: Icon(Icons.cake),
-                ),
-                SizedBox(
-                  height: size.height * cardSizeProp,
-                  child: PageView(
-                    scrollDirection: Axis.horizontal,
-                    controller: PageController(
-                      initialPage: 0,
-                      keepPage: true,
-                      viewportFraction: 0.5
-                    ),
-                    children: nextBirthdays.isEmpty?
-                      const [Center(child: Text("No hay más cumpleaños en estos días"),)]:
-                      List<Widget>.from(nextBirthdays.map((user){
-                        return _getBirthdayCard(size, context, user);
-                      }))
-                  ),
-                )
-              ],
-            ),
-          );
-        }
+          ),
+        ],
       ),
     );
   }
@@ -186,6 +195,8 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     late Color background;
     late Color foreground;
     
+    // This is complex man! But what I'm doing here in general words is: I have no fucking idea what a hell
+    // I was doing here, but just don't worry, it works... at least that's what I think.
     DateTime date = DateTime.parse(user["fnacimiento"] ?? "0000-00-00");
     DateTime currDate = DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day);
     

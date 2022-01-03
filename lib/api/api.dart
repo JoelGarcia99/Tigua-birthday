@@ -36,7 +36,7 @@ class API {
   /// useful when you're offline.
   Future<List<Map<String, dynamic>>> queryCumpleaneros(String filter) async {
 
-
+    isLoading = true;
     // If there is no file or if it's empty then fetch data from API
     final url = Uri.parse("http://ieanjesus.portomamey.com/public/Home/datatable_cumple");
 
@@ -60,12 +60,15 @@ class API {
     final response = await http.post(url, body: body);
 
     if(response.statusCode != 200) {
+      isLoading = false;
       return [];
     }
 
     elementsSearched.clear();
     final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
     elementsSearched.addAll(List<Map<String, dynamic>>.from(decodedJson["data"]));
+    
+    isLoading = false;
     return elementsSearched;
 
   }

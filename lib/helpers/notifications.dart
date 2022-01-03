@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tigua_birthday/api/api.dart';
 
 
@@ -12,7 +13,21 @@ void callbackDispatcher() {
   // you don't just don't touch it
   WidgetsFlutterBinding.ensureInitialized();
 
-  API().queryCumpleaneros('').then((List<Map<String, dynamic>> birthdayList) {
+  
+  API().queryCumpleaneros('').then((List<Map<String, dynamic>> birthdayList) async {
+
+    
+    final cacheInstance = await SharedPreferences.getInstance();
+
+    // idk why but this thing is showing notifications every 10 minutes even when I
+    // set it up to 24 hours -.- so to handle this problem I'm gonna dismiss all
+    // notifications before the first one is showed, until the next day
+    final int? lastDay = cacheInstance.getInt("last_notification_day");
+
+    if(lastDay != null && lastDay == DateTime.now().day) {
+      return;
+    }
+
     birthdayList.sort((a, b){
 
       final ca = DateTime.parse(a['fnacimiento']);
@@ -35,6 +50,9 @@ void callbackDispatcher() {
     ));
 
     if(todayUsers.isNotEmpty) {
+      // Setting this day as notified, so no more notifications will be showed
+      // after 24 hrs
+      cacheInstance.setInt("last_notification_day", DateTime.now().day);
       Notifications().show(
         "Tienes ${todayUsers.length} cumpleaños el día de hoy.", 
         "${todayUsers.where((element) => element['tipo'] == "P").length} pastores cumplen años."

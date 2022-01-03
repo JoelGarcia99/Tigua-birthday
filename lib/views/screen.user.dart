@@ -145,7 +145,7 @@ class UserScreen extends StatelessWidget {
         title: const Text("Licencia"),
         subtitle: Text("${user["licencia"]}"),
       ),
-      ListTile(
+      if(telefono.trim().isNotEmpty) ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
         subtitle: Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
@@ -157,7 +157,7 @@ class UserScreen extends StatelessWidget {
                 icon: const Icon(Icons.phone),
                 onPressed: ()async{
                   SmartDialog.showLoading();
-                  await launch('tel:+593 ${user["celular"]}');
+                  await launch('tel:$telefono');
                   SmartDialog.dismiss();
                 },
               ),
@@ -166,7 +166,7 @@ class UserScreen extends StatelessWidget {
                 onPressed: ()async{
                   SmartDialog.showLoading();
                   final link = WhatsAppUnilink(
-                    phoneNumber: "+593 ${user["celular"]}",
+                    phoneNumber: telefono,
                     text: "Felicidades! Dios le bendiga",
                   );
 
@@ -198,6 +198,8 @@ class UserScreen extends StatelessWidget {
 
   List<Widget> loadPastorEsposaData(BuildContext context, Map<String, dynamic> user) {
     
+    final size = MediaQuery.of(context).size;
+
     String telefono = user["telefono"] ?? "";
 
     if(telefono.length == 10) {
@@ -224,10 +226,38 @@ class UserScreen extends StatelessWidget {
           );
         },
       ),
-      ListTile(
+      if(telefono.trim().isNotEmpty) ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle: Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
+        subtitle: Text(telefono),
+        trailing: SizedBox(
+          width: size.width * 0.3,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.phone),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  await launch('tel:$telefono');
+                  SmartDialog.dismiss();
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.chat_bubble),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  final link = WhatsAppUnilink(
+                    phoneNumber: telefono,
+                    text: "Felicidades! Dios le bendiga",
+                  );
+
+                  await launch('$link');
+                  SmartDialog.dismiss();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       ListTile(
         leading: const Icon(Icons.baby_changing_station),
@@ -249,6 +279,7 @@ class UserScreen extends StatelessWidget {
 
   List<Widget> loadPastorHijoData(BuildContext context, Map<String, dynamic> user) {
     
+    final size = MediaQuery.of(context).size;
     String telefono = user["telefono"] ?? "";
 
     if(telefono.length == 10) {
@@ -258,7 +289,7 @@ class UserScreen extends StatelessWidget {
       telefono = "+593 $telefono";
     }
     
-    return <Widget>[   
+    return <Widget>[
       ListTile(
         trailing: const Icon(Icons.arrow_forward_ios),
         leading: const Icon(Icons.person),
@@ -275,10 +306,39 @@ class UserScreen extends StatelessWidget {
           );
         },
       ),
-      ListTile(
+
+      if(telefono.trim().isNotEmpty) ListTile(
         leading: const Icon(Icons.smartphone),
         title: const Text("Número de teléfono"),
-        subtitle:  Text(telefono.trim().isNotEmpty?telefono:"No disponible"),
+        subtitle: Text(telefono),
+        trailing: SizedBox(
+          width: size.width * 0.3,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.phone),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  await launch('tel:$telefono');
+                  SmartDialog.dismiss();
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.chat_bubble),
+                onPressed: ()async{
+                  SmartDialog.showLoading();
+                  final link = WhatsAppUnilink(
+                    phoneNumber: telefono,
+                    text: "Felicidades! Dios le bendiga",
+                  );
+
+                  await launch('$link');
+                  SmartDialog.dismiss();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       ListTile(
         leading: const Icon(Icons.smartphone),
