@@ -14,19 +14,22 @@ void main() async {
 
   // if it's the first time then delete everything if exists (old installations)
   // and create new workers
-  if(cacheInstance.getBool("first_time") ?? true) {
+  if (cacheInstance.getBool("first_time") ?? true) {
     cacheInstance.setBool("first_time", false);
-    await Workmanager().cancelAll();
+    // await Workmanager().cancelAll();
 
     final currentTime = DateTime.now();
-    final targetTime = DateTime.parse("${currentTime.year}-${currentTime.month < 10? "0${currentTime.month}":currentTime.month}-${currentTime.day < 10? "0${currentTime.day}":currentTime.day} 00:00:00").add(const Duration(days: 1));
+    final targetTime = DateTime.parse(
+            "${currentTime.year}-${currentTime.month < 10 ? "0${currentTime.month}" : currentTime.month}-${currentTime.day < 10 ? "0${currentTime.day}" : currentTime.day} 00:00:00")
+        .add(const Duration(days: 1));
 
     // reapeat this every single day. The seconds in [initialDelay] makes reference to
     // the 00h00, so I added 3600 * 8 in order to get the notification at 7 am
     await Workmanager().registerPeriodicTask(
-      "birthday_sync", 
+      "birthday_sync",
       "Birthday synchronization",
-      initialDelay: Duration(seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
+      initialDelay: Duration(
+          seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
       frequency: const Duration(days: 1),
     );
   }
@@ -39,8 +42,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorObservers: [FlutterSmartDialog.observer],
       builder: FlutterSmartDialog.init(),
       title: 'IEAN Jesús | Agenda pastoral',
