@@ -83,6 +83,7 @@ flutter:
   assets:
     - assets/loader.gif
     - assets/logo-ieanjesus.png
+    - assets/ieanjesus.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
