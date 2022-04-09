@@ -6,18 +6,25 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 class UserScreen extends StatelessWidget {
+
   const UserScreen({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    final Map<String, dynamic> user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final Map<String, dynamic> params = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    // if [params] does not have a key named 'user' then the while object of [params]
+    // is going to be threated as the user object
+    final Map<String, dynamic> user =  params.containsKey("user")? params['user']:params;
+    final isBirthday = params['is_birthday'] ?? false;
+
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Detalles de usuario",
+        title: Text(
+          "Detalles ${isBirthday? "del cumpleañero":"de usuario"}",
         ),
         foregroundColor: Colors.black,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,

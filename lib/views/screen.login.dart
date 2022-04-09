@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tigua_birthday/router/router.routes.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -87,6 +88,8 @@ class LoginScreen extends StatelessWidget {
 		    if(formKey.currentState?.validate() ?? false) {
 		      //TODO: save here
 		    }
+		    //TODO: Remove it later
+		    Navigator.pushReplacementNamed(context, RouteNames.home.toString());
 		  },
 		  style: ButtonStyle(
 
