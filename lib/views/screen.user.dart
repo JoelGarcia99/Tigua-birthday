@@ -29,17 +29,21 @@ class UserScreen extends StatelessWidget {
         foregroundColor: Colors.black,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
         future: !user.containsKey('id')?
-          Future.value(user):API().queryUserByID(user['id'], user['tipo']),
+          Future.value([user]):API().queryUserByID([user['id']], user['tipo']),
         builder: (context, snapshot) {
 
           if(!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator(),);
           }
 
+	  if(snapshot.data!.isEmpty) {
+	    return const Center(child: Text("No encontrado. Intente más tarde"));
+	  }
 
-          final userData = snapshot.data!;
+          final userData = snapshot.data!.last;
+
 
           if(userData.isEmpty) {
             return Center(

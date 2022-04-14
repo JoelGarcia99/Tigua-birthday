@@ -24,6 +24,7 @@ class DoublePhotoComponent extends StatelessWidget {
               return const Icon(Icons.image_not_supported_rounded);
             },
 	    width: size.width,
+	    height: size.width,
             alignment: Alignment.center,
             fit: BoxFit.cover,
             placeholder: "assets/loader.gif",
@@ -49,6 +50,7 @@ class DoublePhotoComponent extends StatelessWidget {
 		},
 	        alignment: Alignment.center,
 		width: size.width * 0.15,
+		height: size.width * 0.15,
 	        fit: BoxFit.cover,
 	        placeholder: "assets/loader.gif",
 	      ),

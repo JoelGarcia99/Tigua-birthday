@@ -235,7 +235,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           foreground = Colors.white;
           String secondaryPhotoID = (user['foto'] ?? "sin_foto.jpg").split('/').last;
 	  secondaryPhotoUrl = "https://oficial.cedeieanjesus.org/uploads/"
-			      "foto_esposa_pastor/$secondaryPhotoID ";
+			      "foto_esposa_pastor/$secondaryPhotoID";
 
           String photoID = (user['fotosolopastor'] ?? "sin_foto.jpg").split('/').last;
           photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";

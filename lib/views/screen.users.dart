@@ -12,12 +12,12 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
 
-  late String value;
+  late String licenceType; // this variable will filter licence types
   late final TextEditingController textController;
 
   @override
   void initState() {
-    value = "CUALQUIERA";
+    licenceType = "CUALQUIERA";
     textController = TextEditingController();
     super.initState();
   }
@@ -28,7 +28,7 @@ class _UsersScreenState extends State<UsersScreen> {
     final size = MediaQuery.of(context).size;
     
     // fetching new initial data.
-    API().queryUsersByFilter(value, textController.text, true);
+    API().queryUsersByFilter(licenceType, textController.text, true);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,11 +65,25 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
             ),
           ),
+          MaterialButton(
+            color: Colors.indigo,
+            textColor: Colors.white,
+            child: const Text("Buscar"),
+            onPressed: ()async{
+              
+              textController.text = textController.text.trim();
+
+              SmartDialog.showLoading();
+              await API().queryUsersByFilter(licenceType, textController.text);
+              SmartDialog.dismiss();
+
+            }
+          ),
           ListTile(
             leading: const Icon(Icons.filter),
             title: const Text("Tipo de licencias"),
             trailing: DropdownButton<String>(
-              value: value,
+              value: licenceType,
               items: const [
                 DropdownMenuItem(
                   value: "CUALQUIERA",
@@ -94,25 +108,24 @@ class _UsersScreenState extends State<UsersScreen> {
               ], 
               onChanged: (selected) {
                 setState(() {
-                  value = selected ?? "CUALQUIERA";
+                  licenceType = selected ?? "CUALQUIERA";
                 });
               }
             ),
           ),
-          MaterialButton(
-            color: Colors.indigo,
-            textColor: Colors.white,
-            child: const Text("Buscar"),
-            onPressed: ()async{
-              
-              textController.text = textController.text.trim();
-
-              SmartDialog.showLoading();
-              await API().queryUsersByFilter(value, textController.text);
-              SmartDialog.dismiss();
-
-            }
-          ),
+	  ListTile(
+	      title: const Text("Búsqueda por cargos"),
+	      subtitle: const Text("Iniciar búsqueda avanzada"),
+	      leading: const Icon(Icons.work_outline),
+	      trailing: MaterialButton(
+		color: Colors.indigo,
+		textColor: Colors.white,
+		child: const Text("Empezar"),
+		onPressed: ()async{
+		  Navigator.of(context).pushNamed(RouteNames.filterCargo.toString());
+		}
+	      ),
+	  ),
           StreamBuilder<List<Map<String, dynamic>>>(
             stream: API().dataStream.stream,
             builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
@@ -146,7 +159,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 if(scrollController.offset >= scrollController.position.maxScrollExtent * 0.7
                   && scrollController.position.maxScrollExtent > size.height
                 ) {
-                  API().queryUsersByFilter(value, textController.text);
+                  API().queryUsersByFilter(licenceType, textController.text);
                 }
               });
 
@@ -211,6 +224,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   'id': data['id'],
                   'apellidos': data['apellido_pastor'],
                   'tipo': 'P'
+
                 }
               ),
               title: Text("${data["apellidos"]?? (data['apellido_pastor'] + " " + data['nombre_pastor'])}"),
