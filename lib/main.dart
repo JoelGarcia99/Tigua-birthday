@@ -42,13 +42,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorObservers: [FlutterSmartDialog.observer],
-      builder: FlutterSmartDialog.init(),
-      title: 'IEAN Jesús | Agenda pastoral',
-      initialRoute: RouteNames.login.toString(),
-      routes: buildRoutes(),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+
+	if(!snapshot.hasData) {
+	  return const Center(child: CircularProgressIndicator());
+	}
+
+	final cache = snapshot.data!;
+
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          navigatorObservers: [FlutterSmartDialog.observer],
+          builder: FlutterSmartDialog.init(),
+          title: 'IEAN Jesús | Agenda pastoral',
+          initialRoute: cache.getString('login.token') != null? RouteNames.home.toString():RouteNames.login.toString(),
+          routes: buildRoutes(),
+        );
+      }
     );
   }
 }

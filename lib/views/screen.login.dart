@@ -1,16 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:tigua_birthday/api/auth.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  final formKey = GlobalKey<FormState>();
+  final _usernameCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+
+
+  LoginScreen({Key? key}) : super(key: key);
+
+
 
   @override
   Widget build(BuildContext context) {
-    final _usernameCtrl = TextEditingController();
-    final _passwordCtrl = TextEditingController();
 
     final size = MediaQuery.of(context).size;
-    final formKey = GlobalKey<FormState>();
 
 
     return SafeArea(
@@ -84,12 +93,29 @@ class LoginScreen extends StatelessWidget {
                 ),
 	      const SizedBox(height: 20),
 	      TextButton.icon(
-		  onPressed: (){
+		  onPressed: () async {
+		    SmartDialog.showLoading();
 		    if(formKey.currentState?.validate() ?? false) {
-		      //TODO: save here
+		      final response = await Auth().login(
+			  _usernameCtrl.text,
+			  _passwordCtrl.text
+		      );
+
+		      if(response.isEmpty) {
+			SmartDialog.dismiss();
+			SmartDialog.showToast('No se pudo iniciar sesión. Credenciales incorrectas');
+			return;
+		      }
+
+		      // storing values
+		      final cache = await SharedPreferences.getInstance();
+		      cache.setString('login.token', response['contra']);
+		      cache.setString('user.data', const JsonEncoder().convert(response));
+
+		      Navigator.restorablePopAndPushNamed(context, RouteNames.home.toString());
 		    }
-		    //TODO: Remove it later
-		    Navigator.pushReplacementNamed(context, RouteNames.home.toString());
+
+		    SmartDialog.dismiss();
 		  },
 		  style: ButtonStyle(
 
