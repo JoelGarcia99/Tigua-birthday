@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 import 'package:tigua_birthday/views/components/user_card.dart';
 
 class CargosFiltering extends StatelessWidget {
@@ -13,15 +14,15 @@ class CargosFiltering extends StatelessWidget {
         appBar: AppBar(
           title: const Text(
             "Búsqueda por cargos",
-            style: TextStyle(color: Colors.black, fontSize: 18),
+            style: TextStyle(color: UIConstatnts.backgroundColor, fontSize: 18),
           ),
-          foregroundColor: Colors.black,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          foregroundColor: UIConstatnts.backgroundColor,
+          backgroundColor: UIConstatnts.accentColor,
           actions: [
             IconButton(
                 icon: const Icon(
                   Icons.settings,
-                  color: Colors.black,
+                  color: UIConstatnts.backgroundColor,
                 ),
                 onPressed: () => Navigator.of(context)
                     .pushNamed(RouteNames.settings.toString()))
@@ -44,7 +45,12 @@ class CargosFiltering extends StatelessWidget {
 			  allNodesExpanded: false
 		      ),
 		      indent: 5,
-                      nodes: decodeStrangeJsonProvidedByTigua(context, pastoresNames, snapshot.data!));
+                      nodes: decodeStrangeJsonProvidedByTigua(
+			  context,
+			  pastoresNames,
+			  snapshot.data!,
+			  UIConstatnts.accentStrong
+		      ));
                 })));
   }
 
@@ -53,7 +59,7 @@ class CargosFiltering extends StatelessWidget {
   /// JSON and render those options as ExpansionTiles or Cards if you're already
   /// on a leaf, so don't put the blame on my if you feel a little bit frustrated,
   /// remember that as animals, stress in necessary in our life.
-  List<TreeNode> decodeStrangeJsonProvidedByTigua(BuildContext context, dynamic pastoresNames, dynamic json) {
+  List<TreeNode> decodeStrangeJsonProvidedByTigua(BuildContext context, dynamic pastoresNames, dynamic json, Color labelColor) {
     // For some reason this line of code is not detecting Map<String, dynamic> properly
     // and is detected as _InternarLinkedHashMap<String, dynamic> which in theory should
     // be the same but in practice it isn't... Life is hard, bro :'(
@@ -70,7 +76,12 @@ class CargosFiltering extends StatelessWidget {
 
 	  // If it cannot be parsed into a Map, then... yes, it means it is not a Map :)
 	  try {
-	    return decodeStrangeJsonProvidedByTigua(context, pastoresNames, Map<String, dynamic>.from(pastorID ));
+	    return decodeStrangeJsonProvidedByTigua(
+		context,
+		pastoresNames,
+		Map<String, dynamic>.from(pastorID ),
+		UIConstatnts.lighten(labelColor, 0.2)
+	    );
 	  }
 	  // ignore: empty_catches
 	  catch(e) {}
@@ -104,16 +115,29 @@ class CargosFiltering extends StatelessWidget {
       // Before you start saying I'm doing it wrong assuming that the default case is
       // always a Map... Yes, I'm doing it wrong, but danger in life is necessary!
       default:
+	final size = MediaQuery.of(context).size;
+
         return List<TreeNode>.from((json as Map).keys.map((key) {
           return TreeNode(
-              content: Row(
-                children: [
-		  const Icon(Icons.label_outlined),
-		  const SizedBox(width: 8.0),
-                  Text(key.toString()),
-                ],
+              content: Container(
+                  width: size.width * 0.8,
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+			  color: labelColor,
+			  borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Text(
+		      key.toString(),
+		      style: const TextStyle(color: UIConstatnts.backgroundColor),
+		      textAlign: TextAlign.center
+		  ),
               ),
-              children: decodeStrangeJsonProvidedByTigua(context, pastoresNames ?? [], json[key] ?? []));
+              children: decodeStrangeJsonProvidedByTigua(
+		  context,
+		  pastoresNames ?? [],
+		  json[key] ?? [],
+		  UIConstatnts.lighten(labelColor, 0.2)
+	      ));
         }));
     }
   }

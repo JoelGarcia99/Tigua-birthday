@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -13,10 +11,10 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           "Opciones",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: UIConstatnts.backgroundColor),
         ),
-        foregroundColor: Colors.black,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: UIConstatnts.backgroundColor,
+        backgroundColor: UIConstatnts.accentColor,
       ),
       body: ListView(
         children: [

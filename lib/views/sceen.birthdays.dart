@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/components/doubleFotoComponent.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 
 class BirthdayScreen extends StatefulWidget {
   const BirthdayScreen({Key? key}) : super(key: key);
@@ -27,14 +28,14 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
       appBar: AppBar(
         title: const Text(
           "IEAN Jesús | Agenda pastoral",
-          style: TextStyle(color: Colors.black, fontSize: 18),
+          style: TextStyle(color: Colors.white, fontSize: 18),
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: UIConstatnts.accentColor,
         actions: [
           IconButton(
               icon: const Icon(
                 Icons.settings,
-                color: Colors.black,
+                color: UIConstatnts.backgroundColor,
               ),
               onPressed: () => Navigator.of(context)
                   .pushNamed(RouteNames.settings.toString()))
@@ -51,15 +52,15 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             direction: Axis.horizontal,
             children: [
-              _getFilterTag("Pastor", const Color(0xff110066)),
+              _getFilterTag("Pastor", UIConstatnts.pastorColor),
               const SizedBox(
                 width: 10.0,
               ),
-              _getFilterTag("Esposa", const Color(0xff8C0327)),
+              _getFilterTag("Esposa", UIConstatnts.wifeColor),
               const SizedBox(
                 width: 10.0,
               ),
-              _getFilterTag("Hijo", const Color(0xffFFD432)),
+              _getFilterTag("Hijo", UIConstatnts.sonColor) 
             ],
           ),
           FutureBuilder<List<Map<String, dynamic>>>(
@@ -231,7 +232,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     if (user.containsKey("id")) {
       switch ((user['tipo'] as String).trim().toUpperCase()) {
         case "E":
-          background = const Color(0xff8C0327);
+          background = UIConstatnts.wifeColor;
           foreground = Colors.white;
           String secondaryPhotoID = (user['foto'] ?? "sin_foto.jpg").split('/').last;
 	  secondaryPhotoUrl = "https://oficial.cedeieanjesus.org/uploads/"
@@ -243,7 +244,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
           break;
         case "P":
-          background = const Color(0xff110066);
+          background = UIConstatnts.pastorColor;
           foreground = Colors.white;
           String photoID = (user['foto'] ?? "sin_foto.jpg").split('/').last;
           photoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$photoID";
@@ -252,7 +253,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           break;
         case "H":
         default:
-          background = const Color(0xffFFD432);
+          background = UIConstatnts.sonColor;
           foreground = Colors.black;
           String secondaryPhotoID = ("sin_foto.jpg").split('/').last;
           secondaryPhotoUrl = "https://oficial.cedeieanjesus.org/uploads/foto_pastor/$secondaryPhotoID";

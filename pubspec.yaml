@@ -85,6 +85,8 @@ flutter:
     - assets/loader.gif
     - assets/logo-ieanjesus.png
     - assets/ieanjesus.png
+    - assets/icons/phone.png
+    - assets/icons/whatsapp.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

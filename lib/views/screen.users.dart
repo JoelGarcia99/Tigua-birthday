@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 import 'package:tigua_birthday/views/components/user_card.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -35,12 +36,12 @@ class _UsersScreenState extends State<UsersScreen> {
       appBar: AppBar(
         title: const Text(
           "IEAN Jesús | Agenda pastoral",
-          style: TextStyle(color: Colors.black, fontSize: 18),
+          style: TextStyle(color: UIConstatnts.backgroundColor, fontSize: 18),
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: UIConstatnts.accentColor,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black,),
+	  IconButton(
+	      icon: const Icon(Icons.settings, color: UIConstatnts.backgroundColor),
             onPressed: ()=>Navigator.of(context).pushNamed(RouteNames.settings.toString())
           )
         ],

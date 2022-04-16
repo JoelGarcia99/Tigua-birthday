@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 import 'package:tigua_birthday/views/sceen.birthdays.dart';
 import 'package:tigua_birthday/views/screen.users.dart';
 
@@ -35,6 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   BottomNavigationBar _bottomMenu() {
     return BottomNavigationBar(
+	selectedItemColor: UIConstatnts.backgroundColor,
+	backgroundColor: UIConstatnts.accentColor,
+	unselectedItemColor: Colors.grey[300],
       currentIndex: pageIndex,
       onTap: (index) {
         setState((){
@@ -44,8 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.celebration_outlined),
-          activeIcon: Icon(Icons.celebration),
+          activeIcon: Icon(Icons.celebration, color: Colors.white),
           label: "Cumpleaños",
+	  
           tooltip: "Lista de cumpleaños"
         ),
         BottomNavigationBarItem(

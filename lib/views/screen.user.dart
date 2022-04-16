@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/ui/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
@@ -26,8 +27,8 @@ class UserScreen extends StatelessWidget {
         title: Text(
           "Detalles ${isBirthday? "del cumpleañero":"de usuario"}",
         ),
-        foregroundColor: Colors.black,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: UIConstatnts.backgroundColor,
+        backgroundColor: UIConstatnts.accentColor,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: !user.containsKey('id')?
@@ -165,7 +166,10 @@ class UserScreen extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.phone),
+                icon: Image.asset(
+		    "assets/icons/phone.png",
+		    width: 24
+		),
                 onPressed: ()async{
                   SmartDialog.showLoading();
                   await launch('tel:$telefono');
@@ -173,7 +177,7 @@ class UserScreen extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.chat_bubble),
+                icon: Image.asset('assets/icons/whatsapp.png'),
                 onPressed: ()async{
                   SmartDialog.showLoading();
                   final link = WhatsAppUnilink(
