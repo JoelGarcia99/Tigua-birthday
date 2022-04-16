@@ -67,11 +67,19 @@ class UserCardComponent extends StatelessWidget {
 		      const TextSpan(text: "Iglesia: ", style: TextStyle(fontWeight: FontWeight.bold)),
 		    if( showIglesia)
 		      TextSpan(text: "${data["nombre_iglesia"]}"),
-                    TextSpan(
-		      text: showOrdenacion? "\nLicencia: ":"Licencia",
-		      style: const TextStyle(fontWeight: FontWeight.bold)
-		    ),
-                    TextSpan(text: "${data["licencia"]}"),
+                    if(showOrdenacion)
+		      TextSpan(
+			text: showOrdenacion? "\nLicencia: ":"Licencia",
+			style: const TextStyle(fontWeight: FontWeight.bold)
+		      ),
+                    if(showOrdenacion)TextSpan(text: "${data[showOrdenacion?"licencia":"cargo"]}")
+		    else TextSpan(
+			text: "${data['cargo']}",
+			style:  const TextStyle(
+			    fontWeight:  FontWeight.bold,
+			    color: Colors.indigo
+			)
+		    )
                   ]
                 )
               )
