@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:tigua_birthday/api/api.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
+import 'package:tigua_birthday/views/components/user_card.dart';
 
 class CargosFiltering extends StatelessWidget {
   const CargosFiltering({Key? key}) : super(key: key);
@@ -42,7 +43,7 @@ class CargosFiltering extends StatelessWidget {
 		      treeController: TreeController(
 			  allNodesExpanded: false
 		      ),
-		      indent: 15,
+		      indent: 5,
                       nodes: decodeStrangeJsonProvidedByTigua(context, pastoresNames, snapshot.data!));
                 })));
   }
@@ -88,43 +89,15 @@ class CargosFiltering extends StatelessWidget {
 	    return TreeNode();
 	  }
 
-          return TreeNode(
-	    content: Expanded(
-		child: GestureDetector(
-		    onTap: ()=>Navigator.pushNamed(
-			context,
-			RouteNames.user.toString(), 
-			arguments: {
-			  'id': _pastorName['id'],
-			  'apellidos': _pastorName['apellido_pastor'],
-			  'tipo': 'P'
-			}
-		    ),
-	        child: Container(
-		  decoration: BoxDecoration(
-		      borderRadius: BorderRadius.circular(8.0),
-		      color: Colors.indigo,
-		      boxShadow:  [
-			BoxShadow(
-			    color:  Colors.grey[400]!,
-			    offset:  const Offset(3.0, 3.0),
-			    blurRadius:  2.0,
-			    spreadRadius: 2.0
-			)
-		      ]
-		  ),
-		  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-		  margin: const EdgeInsets.only(right: 8.0, bottom: 10.0),
-		  child: Text(
-		      "${_pastorName['apellido_pastor']} ${_pastorName['nombre_pastor']}",
-		      style: const TextStyle(
-			  fontWeight: FontWeight.bold,
-			  color:  Colors.white
-		      )
+	  return TreeNode(
+	      content: Expanded(
+		  child: UserCardComponent(
+		      userData: _pastorName as Map<String, dynamic>,
+		      showIglesia: false,
+		      showOrdenacion: false
+
 		  )
-	        ),
 	      ),
-	    )
 	  );
         }));
 
