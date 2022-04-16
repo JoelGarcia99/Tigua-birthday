@@ -57,7 +57,8 @@ class MyApp extends StatelessWidget {
           navigatorObservers: [FlutterSmartDialog.observer],
           builder: FlutterSmartDialog.init(),
           title: 'IEAN Jesús | Agenda pastoral',
-          initialRoute: cache.getString('login.token') != null? RouteNames.home.toString():RouteNames.login.toString(),
+          // initialRoute: cache.getString('login.token') != null? RouteNames.home.toString():RouteNames.login.toString(),
+          initialRoute: RouteNames.home.toString(),
           routes: buildRoutes(),
         );
       }

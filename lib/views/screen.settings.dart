@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({ Key? key }) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +22,12 @@ class SettingsPage extends StatelessWidget {
         children: [
           FutureBuilder(
             future: PackageInfo.fromPlatform(),
-            builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
-              if(!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator(),);
+            builder:
+                (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
 
               return Column(
@@ -39,21 +42,21 @@ class SettingsPage extends StatelessWidget {
                     title: const Text("Número de compilación"),
                     subtitle: Text(snapshot.data!.buildNumber),
                   ),
-		  const Divider(),
-		  ListTile(
-		      leading: const Icon(Icons.exit_to_app),
-		      title: const Text("Salir de la app"),
-		      onTap: () async {
-			SmartDialog.showLoading();
-			final cache = await SharedPreferences.getInstance();
+                  const Divider(),
+                  // ListTile(
+                  //     leading: const Icon(Icons.exit_to_app),
+                  //     title: const Text("Salir de la app"),
+                  //     onTap: () async {
+                  //       SmartDialog.showLoading();
+                  //       final cache = await SharedPreferences.getInstance();
 
-			cache.remove('login.token');
-			cache.remove('login.user');
+                  //       cache.remove('login.token');
+                  //       cache.remove('login.user');
 
-			Navigator.of(context).pushReplacementNamed(RouteNames.login.toString());
-			SmartDialog.dismiss();
-		      }
-		  )
+                  //       Navigator.of(context)
+                  //           .pushReplacementNamed(RouteNames.login.toString());
+                  //       SmartDialog.dismiss();
+                  //     })
                 ],
               );
             },
