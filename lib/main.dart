@@ -25,13 +25,17 @@ void main() async {
 
     // reapeat this every single day. The seconds in [initialDelay] makes reference to
     // the 00h00, so I added 3600 * 8 in order to get the notification at 7 am
-    await Workmanager().registerPeriodicTask(
-      "birthday_sync",
-      "Birthday synchronization",
-      initialDelay: Duration(
-          seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
-      frequency: const Duration(days: 1),
-    );
+    try {
+      await Workmanager().registerPeriodicTask(
+        "birthday_sync",
+        "Birthday synchronization",
+        initialDelay: Duration(
+            seconds: targetTime.difference(currentTime).inSeconds + 3600 * 8),
+        frequency: const Duration(days: 1),
+      );
+	} catch (e) {
+		debugPrint(e.toString());
+	}
   }
 
   runApp(const MyApp());
@@ -43,25 +47,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<SharedPreferences>(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot) {
+        future: SharedPreferences.getInstance(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-	if(!snapshot.hasData) {
-	  return const Center(child: CircularProgressIndicator());
-	}
+          final cache = snapshot.data!;
 
-	final cache = snapshot.data!;
-
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          navigatorObservers: [FlutterSmartDialog.observer],
-          builder: FlutterSmartDialog.init(),
-          title: 'IEAN Jesús | Agenda pastoral',
-          // initialRoute: cache.getString('login.token') != null? RouteNames.home.toString():RouteNames.login.toString(),
-          initialRoute: RouteNames.home.toString(),
-          routes: buildRoutes(),
-        );
-      }
-    );
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            navigatorObservers: [FlutterSmartDialog.observer],
+            builder: FlutterSmartDialog.init(),
+            title: 'IEAN Jesús | Agenda pastoral',
+            // initialRoute: cache.getString('login.token') != null? RouteNames.home.toString():RouteNames.login.toString(),
+            initialRoute: RouteNames.home.toString(),
+            routes: buildRoutes(),
+          );
+        });
   }
 }

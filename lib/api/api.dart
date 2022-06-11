@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:http/http.dart' as http;
 
+//TODO: what a hell man? I am not able to find any documentation here
+// please document all these file.
 /// Singleton backend connection API
 class API {
   static API? _instance;
@@ -93,7 +95,8 @@ class API {
     return List<Map<String, dynamic>>.from(decodedJson["data"]);
   }
 
-  Future<List<Map<String, dynamic>>> queryUserByID(List ids, String type) async {
+  Future<List<Map<String, dynamic>>> queryUserByID(
+      List ids, String type) async {
     late String filter;
 
     switch (type) {
@@ -115,22 +118,17 @@ class API {
 
     final bodyIDs = <String, dynamic>{};
 
-    if(filter == "retornapastor") {
-      for (int i=0; i<ids.length; ++i) {
-	bodyIDs.addAll(<String, dynamic>{"id[$i]": ids[i].toString()});
+    if (filter == "retornapastor") {
+      for (int i = 0; i < ids.length; ++i) {
+        bodyIDs.addAll(<String, dynamic>{"id[$i]": ids[i].toString()});
       }
-    }
-    else {
+    } else {
       bodyIDs.addAll({"id": ids.first});
     }
 
-    final response = await http.post(
-      uri,
-      headers: {
-	'content-Type':'application/x-www-form-urlencoded'
-      },
-      body: bodyIDs
-    );
+    final response = await http.post(uri,
+        headers: {'content-Type': 'application/x-www-form-urlencoded'},
+        body: bodyIDs);
 
     if (response.statusCode != 200) {
       SmartDialog.showToast("No hay más datos para cargar",
@@ -223,23 +221,102 @@ class API {
   }
 
   Future<Set> extractPastoresIDs(Map<String, dynamic> pastores) async {
-
     final ids = <dynamic>{};
 
-    for(var pastor in pastores.keys) {
+    for (var pastor in pastores.keys) {
       // Looking for ids in leaf nodes
-      switch(pastores[pastor].runtimeType) {
-	case List<Map<String, dynamic>>:
-	  ids.addAll(pastores[pastor]);
-	  break;
-	case List:
-	  ids.addAll(pastores[pastor]);
-	  break;
-	default:
-	  ids.addAll(await extractPastoresIDs(pastores[pastor]));
-	  break;
+      switch (pastores[pastor].runtimeType) {
+        case List<Map<String, dynamic>>:
+          ids.addAll(pastores[pastor]);
+          break;
+        case List:
+          ids.addAll(pastores[pastor]);
+          break;
+        default:
+          ids.addAll(await extractPastoresIDs(pastores[pastor]));
+          break;
       }
     }
     return ids;
+  }
+
+  /// Starts fetching dates for ministerial birthday
+  /// @returns
+  Future<List<Map<String, dynamic>>> fetchMinisterialBirthdays() async {
+    // If there is no file or if it's empty then fetch data from API
+    final url = Uri.parse("$host/datatable_ministerial");
+    // birthdays within the next 7 days
+    final currentWeek = DateTime.now();
+    var endWeek = currentWeek.add(const Duration(days: 7));
+
+    if (endWeek.year > currentWeek.year) {
+      endWeek = DateTime(currentWeek.year, 12, 31);
+    }
+
+    final body = {
+      "mesini": currentWeek.month.toString(),
+      "mesfin": endWeek.month.toString(),
+      "diaini": currentWeek.day.toString(),
+      "diafin": endWeek.day.toString(),
+    };
+
+    final response = await http.post(url, body: body);
+
+    if (response.statusCode != 200) {
+      return [];
+    }
+    final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
+
+    return List<Map<String, dynamic>>.from(decodedJson['data']);
+  }
+
+  /// Starts fetching dates for ministerial birthday
+  /// @returns Future<List<Map<String, dynamic>>>
+  Future<List<Map<String, dynamic>>> fetchPastorAniversary() async {
+    // If there is no file or if it's empty then fetch data from API
+    final url = Uri.parse("$host/datatable_aniver");
+    // birthdays within the next 7 days
+    final currentWeek = DateTime.now();
+    var endWeek = currentWeek.add(const Duration(days: 7));
+
+    if (endWeek.year > currentWeek.year) {
+      endWeek = DateTime(currentWeek.year, 12, 31);
+    }
+
+    final body = {
+      "mesini": currentWeek.month.toString(),
+      "mesfin": endWeek.month.toString(),
+      "diaini": currentWeek.day.toString(),
+      "diafin": endWeek.day.toString(),
+    };
+
+    final response = await http.post(url, body: body);
+
+    if (response.statusCode != 200) {
+      return [];
+    }
+    final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
+
+    return List<Map<String, dynamic>>.from(decodedJson['data']);
+  }
+
+  /// Starts fetching data for a specified congregation
+  /// @param {String} congregationID The ID of the congregation
+  /// @returns Future<Map<String, dynamic>> The data of the congregation
+  Future<Map<String, dynamic>> fetchCongregationData(
+      String congregationID) async {
+    // If there is no file or if it's empty then fetch data from API
+    final url = Uri.parse("$host/get_congrebyid");
+
+    final response = await http.post(url, body: {
+      "idcongre": congregationID,
+    });
+
+    if (response.statusCode != 200) {
+      return {};
+    }
+
+    final decodedJson = (json.decode(response.body));
+    return Map<String, dynamic>.from(decodedJson['data'].first);
   }
 }

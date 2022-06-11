@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tigua_birthday/ui/constants.dart';
-import 'package:tigua_birthday/views/sceen.birthdays.dart';
-import 'package:tigua_birthday/views/screen.users.dart';
+import 'package:tigua_birthday/views/common/screen.users.dart';
+import 'package:tigua_birthday/views/home/sceen.birthdays.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({ Key? key }) : super(key: key);
