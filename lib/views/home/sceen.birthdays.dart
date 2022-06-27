@@ -142,12 +142,14 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                   prefixIcon: Icons.cake,
                   size: Size(size.width, size.height * cardSizeProp),
                   data: _buildBirthdayCards(todayUsers, size, context)),
-              CarrouselComponent(
-                  title: "Cumpleaños siguientes",
-                  emptyTag: "Nadie cumple años en la próxima semana",
-                  prefixIcon: Icons.cake,
-                  size: Size(size.width, size.height * cardSizeProp),
-                  data: _buildBirthdayCards(nextBirthdays, size, context)),
+			  // TODO: Yeah, I know Tigua could change his decision so just uncomment this partion of code
+			  // if you wanna get back the "next birthdays" carrousel
+              // CarrouselComponent(
+              //     title: "Cumpleaños siguientes",
+              //     emptyTag: "Nadie cumple años en la próxima semana",
+              //     prefixIcon: Icons.cake,
+              //     size: Size(size.width, size.height * cardSizeProp),
+              //     data: _buildBirthdayCards(nextBirthdays, size, context)),
             ],
           );
         });
@@ -215,7 +217,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           return Column(
             children: [
               CarrouselComponent(
-                  title: "Cumpleaños Ministeriales",
+                  title: "Cumpleaños Ministeriales (${data.length})",
                   emptyTag: "No hay cumpleaños ministeriales en estos días",
                   prefixIcon: Icons.celebration,
                   size: Size(size.width, size.height * heightProp),
@@ -249,7 +251,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
           return Column(children: [
             CarrouselComponent(
-                title: "Aniversarios de Pastores",
+                title: "Aniversarios Pastorales (${data.length})",
                 emptyTag: "No hay aniversarios de pastores en estos días",
                 prefixIcon: Icons.celebration,
                 size: Size(size.width, size.height * heightProp),
