@@ -13,6 +13,6 @@ Map<String, Widget Function(BuildContext)> buildRoutes() => {
       RouteNames.user.toString(): (_) => const UserScreen(),
       RouteNames.settings.toString(): (_) => const SettingsPage(),
       RouteNames.login.toString(): (_) => LoginScreen(),
-      RouteNames.filterCargo.toString(): (_) => const CargosFiltering(),
+      RouteNames.filterCargo.toString(): (_) => CargosFiltering(),
       RouteNames.congregation.toString(): (_) => const CongregationScreen()
     };

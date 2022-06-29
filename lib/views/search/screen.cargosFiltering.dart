@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:tigua_birthday/api/api.dart';
-import 'package:tigua_birthday/components/dynamic_table/dynamic_table.dart';
 import 'package:tigua_birthday/router/router.routes.dart';
 import 'package:tigua_birthday/ui/constants.dart';
 import 'package:tigua_birthday/views/components/user_card.dart';
 
 class CargosFiltering extends StatelessWidget {
-  const CargosFiltering({Key? key}) : super(key: key);
+	final List<MaterialColor> colors = [
+		Colors.blue,
+		Colors.blueGrey,
+		Colors.lightBlue,
+		Colors.cyan,
+		Colors.indigo
+	];
+
+  CargosFiltering({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +45,19 @@ class CargosFiltering extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              return DynamicTable(data: snapshot.data!);
+              final data = snapshot.data!;
+              final pastoresNames = data['pastores_names'];
+              data.remove('pastores_names');
+
+              // return DynamicTable(data: data, pastoresNames: pastoresNames);
+              return SingleChildScrollView(
+                  child: TreeView(
+					  indent: 10,
+					  treeController: TreeController(
+						  allNodesExpanded: false
+					  ),
+                      nodes: decodeStrangeJsonProvidedByTigua(context,
+                          pastoresNames, snapshot.data!, 0)));
             }));
   }
 
@@ -47,7 +67,7 @@ class CargosFiltering extends StatelessWidget {
   /// on a leaf, so don't put the blame on my if you feel a little bit frustrated,
   /// remember that as animals, stress in necessary in our life.
   List<TreeNode> decodeStrangeJsonProvidedByTigua(BuildContext context,
-      dynamic pastoresNames, dynamic json, Color labelColor) {
+      dynamic pastoresNames, dynamic json, int colorIndex) {
     // For some reason this line of code is not detecting Map<String, dynamic> properly
     // and is detected as _InternarLinkedHashMap<String, dynamic> which in theory should
     // be the same but in practice it isn't... Life is hard, bro :'(
@@ -68,7 +88,7 @@ class CargosFiltering extends StatelessWidget {
                 context,
                 pastoresNames,
                 Map<String, dynamic>.from(pastorID),
-                UIConstatnts.lighten(labelColor, 0.2));
+                colorIndex + 1);
           }
           // ignore: empty_catches
           catch (e) {}
@@ -103,7 +123,7 @@ class CargosFiltering extends StatelessWidget {
                 width: size.width * 0.8,
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: labelColor,
+                  color: colors[colorIndex],
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(key.toString(),
@@ -114,7 +134,7 @@ class CargosFiltering extends StatelessWidget {
                   context,
                   pastoresNames ?? [],
                   json[key] ?? [],
-                  UIConstatnts.lighten(labelColor, 0.2)));
+				  colorIndex + 1));
         }));
     }
   }

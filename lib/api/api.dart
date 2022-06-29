@@ -209,6 +209,7 @@ class API {
     }
 
     final decodedJson = Map<String, dynamic>.from(json.decode(response.body));
+	// TODO: this piece of code is adding too much complexity to the app, ask Tigua to simplify it
     final pastoresIDs = await extractPastoresIDs(decodedJson);
 
     // extracting IDs of 'pastores'
